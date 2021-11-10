@@ -1,0 +1,20 @@
+<html>
+<head>
+<title></title>
+<script src="jQuery.js"></script>
+</head>
+<form name="forme"	id="forme" onsubmit="return validate()">
+Ваше имя*<input type="text" name="imy" size=15 required><br>
+Пароль*<input type="password" id="inp1" size=10 required><br>
+Потверждение пароля*<input type="password" id="inp2" size=10 required><br>
+Электронный адрес*<input type="email" id="user_email" required><br>
+Тема сообщения:*<input type="text" size=15 id="massage" required><br>
+Сообщение:<textarea id="inp3" cols=16 rows=5>Введите сообщение</textarea><br><br>
+<input type="button" value="Проверить" id="b"><input type="reset" value="Очистить форму">
+*-необходимые для заполнения поля
+<div id="res"></div>
+<div id="der"></div>
+</form>
+</body>
+<script src="lab8z_2.js"></script>
+</html>

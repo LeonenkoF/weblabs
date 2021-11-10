@@ -1,0 +1,6 @@
+[{"name":"Сочи","product":"1","stocklevel":"10","price":"2.99"},
+ {"name":"Адлер","product":"2","stocklevel":"12","price":"1.99"},
+ {"name":"Москва","product":"3","stocklevel":"2","price":"4.99"},
+ {"name":"Санкт-Петербург","product":"4","stocklevel":"0","price":"1.50"},
+ {"name":"Уфа","product":"5","stocklevel":"1","price":"3.12"},
+ {"name":"Оренбург","product":"6","stocklevel":"15","price":"0.99"}]

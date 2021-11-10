@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Покупка авиабилетов</title>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script> 
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="http://ajax.aspnetcdn.com/ajax/jquery.ui/1.10.3/themes/south-street/jquery-ui.css">
+    <link rel="stylesheet" href="styles.css">
+    <script>
+/* Локализация datepicker */
+$.datepicker.regional['ru'] = {
+	closeText: 'Закрыть',
+	prevText: 'Предыдущий',
+	nextText: 'Следующий',
+	currentText: 'Сегодня',
+	monthNames: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+	monthNamesShort: ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'],
+	dayNames: ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'],
+	dayNamesShort: ['вск','пнд','втр','срд','чтв','птн','сбт'],
+	dayNamesMin: ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+	weekHeader: 'Не',
+	dateFormat: 'dd.mm.yy',
+	firstDay: 1,
+	isRTL: false,
+	showMonthAfterYear: false,
+	yearSuffix: ''
+};
+$.datepicker.setDefaults($.datepicker.regional['ru']);
+</script>
+    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
+    <style type="text/css">
+    body{
+    background-color: #3366CC;
+   } 
+       h1{
+    color: #fff   } 
+   .freehosting-2domains-link { display: none; }
+        .dcell img {height: 120px}
+        #basketTable {border: thin solid white; border-collapse: collapse}        
+        th, td {padding: 4px; width: 50px}
+        td:first-child, th:first-child {width: 150px}
+        #placeholder {text-align: center}
+        #productWrapper {float: left; width: 56%}
+        #buttonDiv {clear: both}
+		#basketTable {border:none; border-collapse:collapse}
+        #basket {text-align: left;}
+        #buttonDiv {clear: both; margin: 5px}
+        #completeDialog input {width: 150px; margin-left: 5px; text-align: left}
+        #completeDialog label {width: 60px; text-align: right}
+    </style>
+    <script type="text/javascript">
+$(function() {
+    $.getJSON("mydata.json", function(data) {
+        var flowers = $('#flowerTmpl').tmpl(data);
+        var rowCount = 1;    
+        for (var i = 0; i < flowers.length; i += 2) {
+            $("<h2><a href=#>" + data[i].name + " и " + data[i + 1].name
+              + "</a></h2>").appendTo("#products");
+            $("<div id='row" + (rowCount++) + "'></div>")
+                .appendTo("#products")
+                .append(flowers.slice(i, i + 2))
+        }
+        $('#products').accordion();
+				$('#products input').change(function(event) {
+                    $('#placeholder').hide();
+                    var fname = $(this).attr("name");
+                    var row = $('tr[id=' + fname + ']');
+                    if (row.length == 0) {
+                        $('#rowTmpl').tmpl({
+                            name: fname,
+                            val:  $(this).val(),
+                            product: $(this).siblings("label").text()
+                        }).appendTo("#basketTable").find("a").click(function() {
+                            removeTableRow($(this).closest("tr"));
+                            var iElem = $('#products').find("input[name=" + fname + "]")
+							var index = iElem.closest("div[id^=row]").attr('id').substring(2)
+                            $('#products').accordion("option", "active",
+							    Number(iElem.closest("div[id^=row]").attr('id').substring(3)) - 1)
+                            iElem.val(0).select();    
+                        })
+                    } else if ($(this).val() != "0") {
+                        row.children().eq(1).text($(this).val())
+                    } else {
+                        removeTableRow(row)
+                    }                    
+                })
+    });    
+	
+	function removeTableRow(row) {
+          row.remove();                 
+          if ($('#basketTable tbody').children(':visible').length == 1) {
+               $('#placeholder').show();
+          } 
+    }
+	
+	$('#buttonDiv, #basket').wrapAll("<div />").parent().css({
+         float: "left",
+         marginLeft: "2px"
+    })
+        $('#buttonDiv button').button().click(function(e) {
+        e.preventDefault();
+        if ($('#placeholder:visible').length) {
+            
+            $('<div>Вы ничего не выбрали для заказа</div>').dialog({
+                modal: true,
+                buttons: [{text: "OK",
+                    click: function() {$(this).dialog("")}}]
+            })
+        } else {
+            $('#completeDialog').dialog("open");
+        }
+    })
+    $('#completeDialog').dialog({
+       modal: true,
+	   autoOpen: false,
+       buttons: [{text: "OK", click: sendOrder},
+        {text: "Отмена", click: function() {
+          $("#completeDialog").dialog("close");
+        }}]
+    });
+    function sendOrder() {
+        var data = new Object();
+        $('input').each(function(index, elem) {
+            var jqElem = $(elem);
+            data[jqElem.attr("name")] = jqElem.val();
+        })
+        console.log(JSON.stringify(data));
+        $('#completeDialog').dialog("close");
+        $('#products input').val("0");
+        $('#products').accordion("option", "active", 0)
+        $('#basketTable tr').has(':not(th)').filter(':visible').remove();
+        $('#placeholder').show();
+    }
+	
+			
+});
+    </script>
+    <script id="rowTmpl" type="text/x-jquery-tmpl">
+        <tr id=${name}><td>${product}</td><td>${val}</td>
+            <td><a href=#>Удалить</a></td></tr>
+    </script>
+    <script id="flowerTmpl" type="text/x-jquery-tmpl">
+        <div class="dcell">
+            <img src="${product}.jpg"/>
+            <label for="${product}">Количество билетов в город ${name}:</label>
+            <input name="${product}" value="0" />
+        </div>
+    </script>    
+</head>
+<body>
+    <h1>Магазин авиабилетов</h1>
+    <form>
+        <div id="productWrapper">
+            <div id="products"></div>
+        </div>
+        <div id="basket" class="ui-widget ui-widget-content">
+            <table border=1 id="basketTable">
+                <tr class="ui-widget-header"><th>Продукт</th><th>Количество</th><th>Удалить</th></tr>
+                <tr id="placeholder"><td colspan=3>Ничего не выбрано</td></tr>
+            </table>
+        </div>
+        <div id="buttonDiv"><button type="submit">Заказать</button></div>
+    </form>
+    <div id="completeDialog" title="Завершите покупку">        
+            <div><label for="name">Имя: </label><input name="first" /></div>
+            <div><label for="email">Email: </label><input name="email" /></div>
+            <div><label for="city">Город: </label><input name="city" /></div>
+            <div>Дата:<input type="text" id="datepicker"></div>
+ 
+<script>
+$(function(){
+	$("#datepicker").datepicker();
+});
+</script>
+    </div>
+</body>
+</html>
